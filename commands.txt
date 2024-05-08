@@ -1,0 +1,53 @@
+[실행 순서]
+1. sh start_docker.sh kafka  (postgres 테이블은 여기서 자동 생성됨 docker-entrypoint-initdb.d)
+2. sh debezium/register_connector.sh yfinance_connector.json (debezium connector 연결, kafka topics 생성됨)
+3. yfinance_dataset.py으로 dataset 만들기
+4. model_pretrain.py 하기
+5. kafka streams 키기
+6. insert_data_to_postgres로 데이터 넣기
+
+[Postgresql]
+docker exec -it postgres psql -U postgres
+\conninfo : connection information
+\l : list all databases
+SELECT current_database();
+\d : list database tables
+\d+ <table-name> : describe a table
+\dn : list all schemas
+\du : list users and their roles
+
+[debezium]
+TODO : "table.include.list": "public.*",
+show connectors:
+    curl -X GET http://localhost:8083/connectors
+register connector:
+    http POST http://localhost:8083/connectors @/home/ubuntu/connector_configs/connector_json
+delete connector:
+    http DELETE http://localhost:8083/connectors/connector_json
+    curl -X DELETE http://localhost:8083/connectors/yfinance-db-connector
+
+[kafka]
+kafka-topics --bootstrap-server localhost:9092 --list
+kafka-topics --bootstrap-server localhost:9092 --create --topic test --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --topic test --describe
+
+kafka-console-producer --bootstrap-server localhost:9092 --topic test
+kafka-console-consumer --bootstrap-server localhost:9092 --topic postgres.public.yfinance --from-beginning
+
+kafka-console-consumer --bootstrap-server localhost:9092 --topic success.yfinance
+kafka-console-consumer --bootstrap-server localhost:9092 --topic test-rejected-topic
+
+[spark]
+1. dataframe debug
+    scaled_yfinance_df.show()
+    print(scaled_yfinance_df.columns)
+
+2. column data debug
+    print(i) for i in scaled_yfinance_df.select('minmax_scaled_features').collect():
+
+3. save to csv
+    vec_to_string = udf(lambda vec: str(vec) if vec is not None else None, StringType())
+    scaled_yfinance_df = scaled_yfinance_df.withColumn("features", vec_to_string(F.col("features")))
+    scaled_yfinance_df.coalesce(1).write.csv(path="./output.csv", mode="overwrite", header=True)
+
+    enhanced_df.to_csv('./output.csv', columns=['Close', 'Close_t_1', 'Target'], index=False)
