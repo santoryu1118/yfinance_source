@@ -1,11 +1,3 @@
-[실행 순서]
-1. sh start_docker.sh kafka  (postgres 테이블은 여기서 자동 생성됨 docker-entrypoint-initdb.d)
-2. sh debezium/register_connector.sh yfinance_connector.json (debezium connector 연결, kafka topics 생성됨)
-3. yfinance_dataset.py으로 dataset 만들기
-4. model_pretrain.py 하기
-5. kafka streams 키기
-6. insert_data_to_postgres로 데이터 넣기
-
 [Postgresql]
 docker exec -it postgres psql -U postgres
 \conninfo : connection information

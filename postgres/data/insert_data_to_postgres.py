@@ -35,7 +35,7 @@ def process_csv(csv_file_path, table_name, interval_sec, conn, cur):
         for row in reader:
             insert_row(cur, table_name, row)
             conn.commit()  # Commit after each insert
-            time.sleep(interval_sec)  # Wait for 10 seconds before the next insert
+            time.sleep(interval_sec)  # Wait for interval_sec seconds before the next insert
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
     host = 'localhost'  # Use the IP address of the Docker host or localhost if it's exposed
     port = '5432'  # The port your PostgreSQL is exposed on
     table_name = 'yfinance'
-    interval_sec = 0
+    interval_sec = 0.5
 
     # Construct file paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
