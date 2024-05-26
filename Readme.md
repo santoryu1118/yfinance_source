@@ -5,6 +5,7 @@
 
 [기술 블로그](https://www.notion.so/santoryu/yFinance-c179dfdf0bbe4a62855782366cf2a849?pvs=4)
 
+![img.png](architecture.png)
 ---
 ### 프로젝트 워크플로
 1. yFinance 데이터셋을 다운받아 모델 학습용 training 셋과 test 셋으로 나누었습니다. test 셋에서는 outlier 데이터를 임의로 추가하여, 나중에 kafka streams 단계에서 걸러줍니다.
